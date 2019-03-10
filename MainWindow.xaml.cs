@@ -5,8 +5,12 @@
 // <author>Patrik Duch</author>
 //-----------------------------------------------------------------------
 
+using System;
+using GeneticAlgorithm;
+
 namespace Desktop
 {
+    
     using System.Windows;
 
     /// <summary>
@@ -16,27 +20,52 @@ namespace Desktop
     {
         private void SetupWindow()
         {
-            this.Top = 0;
-            this.Left = 0;
+            Top = 0;
+            Left = 0;
 
             var tmp = SystemParameters.WorkArea.Width;
             var to = SystemParameters.WorkArea.Height;
 
-            this.Width = tmp;
+            Width = tmp;
+            Height = to;
 
-            //this.Width = SystemParameters.MaximizedPrimaryScreenWidth- SystemParameters.BorderWidth;
-            //this.Height = SystemParameters.MaximumWindowTrackHeight;
-
-            this.Height = to;
-
-            this.Title = "Genetic algorithm";
+            Title = "Genetic algorithm";
         }
         public MainWindow()
         {
             
             InitializeComponent();
             SetupWindow();
+        }
 
+
+        private void ProcessGeneticAlgorithm(object sender, RoutedEventArgs e)
+        {
+
+            // Process input
+            var res = inputTextBox.Text.Split(',');
+            var array = Array.ConvertAll(res, int.Parse);
+
+            // Genetic algorithm properties
+            var geneticProps = new GeneticProps(array);
+            var population = new Population(geneticProps,1000000);
+            // Population initialization
+            population.Initialize();
+
+            // Genetic algorithm process
+            var algorithm = new Algorithm(geneticProps);
+
+            while (population.GetFittestChromosome().GetFitness() != geneticProps.MaxFitness)
+            {
+                population = algorithm.EvolvePopulation(population);
+
+            }
+
+            // Save the result
+            var result = population.GetFittestChromosome();
+
+            // Transform result into UI
+            resultLabel.Content = result.ToString();
 
         }
     }
